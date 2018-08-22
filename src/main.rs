@@ -20,7 +20,7 @@ use nix::sys::socket::{sockopt, InetAddr};
 use std::os::unix::io::AsRawFd;
 
 fn main() {
-    let listen_addr = env::args().nth(1).unwrap_or("127.0.0.1:1080".to_string());
+    let listen_addr = env::args().nth(1).unwrap_or("[::1]:1080".to_string());
     let listen_addr = listen_addr.parse::<SocketAddr>().unwrap();
 
     // Create the event loop that will drive this server.
@@ -35,7 +35,7 @@ fn main() {
         .incoming()
         .for_each(move |(client, client_addr)| {
             let server_addr = getsockopt(client.as_raw_fd(), sockopt::OriginalDst).unwrap();
-            let server_addr = InetAddr::V4(server_addr).to_std();
+            let server_addr = InetAddr::V6(server_addr).to_std();
             if client.local_addr().unwrap() == server_addr {
                 eprintln!("[WARM]from {} to {} error, cannot service to local network.",
                           client_addr,
